@@ -1,0 +1,304 @@
+<apex:page controller="OpportunityKanbanController" standardStylesheets="false" showHeader="false" applyHtmlTag="false" applyBodyTag="false" docType="html-5.0">
+    <html>
+        <head>
+            <meta charset="utf-8" />
+            <meta http-equiv="x-ua-compatible" content="ie=edge" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            
+            <title>Opportunity Kanban</title>
+            
+            <link type="text/css" href="https://www.lightningdesignsystem.com/assets/styles/slds.css" rel="stylesheet" />
+            <link type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" />
+            <link type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+            
+            <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.js"></script>
+            <script type="text/javascript" src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+            <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+            
+            <script>
+                
+                $(document).ready(function(){
+                
+                $('li[id^="edit"]').on('click', function() {  
+                    alert($(this).attr('value')+' Edit');
+                });
+                
+                
+                
+                   
+            });
+            </script>
+            <style type="text/css">
+                body {
+                padding: 1em;
+                }
+                .slds-item {
+                box-shadow: 0 0 10px gray;
+                border: none !important;
+                background-color: #fff;
+                border-radius: 0 !important;
+                border-left: 5px solid #56aadf !important;
+                }
+                .slds-title {
+                border-radius: 3px;
+                background-color: #e0e5ee;
+                border: 1px solid #d8dde6;
+                cursor: move;
+                }
+                .slds-col {
+                height: 520px;
+                overflow-y: auto;
+                border-left: 1px solid whitesmoke;
+                }
+                .slds-item-placeholder {
+                border: 2px dotted gray !important;
+                height: 5rem;
+                }
+                .moving-card {
+                opacity: 0.5;
+                transform: rotate( -5deg );
+                }
+                .myClassitem:after{
+                content: '';
+                width: 0;
+                height: 50px;
+                position: absolute;
+                border: 1px solid #F7FAFA;
+                top:  0px;
+                left: 0px;
+                }
+                .myClassitem:before{
+                content:none;
+                display:none !important;
+                border: 10px solid black !important;
+                height: 100% !important;
+                }
+                .myClassitem:first-child{
+                border-radius : 0 !important;
+                }
+                .myClassitem:last-child{
+                border-radius : 0 !important;
+                }
+                
+                .dropdown-content {
+                display: none;
+                position: absolute;
+                background-color: #f9f9f9;
+                min-width: 140px;
+                box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+                z-index: 1;
+                }
+                
+                .dropdown-content a {
+                color: black;
+                padding: 12px 16px;
+                text-decoration: none;
+                display: block;
+                }
+                
+                .dropdown-content a:hover {background-color: #f1f1f1}
+                
+                .dropdown:hover .dropdown-content {
+                display: block;
+                }
+                
+                .dropdown:hover .dropbtn {
+                background-color: #3e8e41;
+                }
+                
+            </style>
+        </head>
+        <apex:form >
+        <body>
+            <div class="slds">
+                
+                <!--Page Header-->
+                <div class="slds-page-header slds-m-bottom--small" role="banner">
+                    <div class="slds-media slds-media--center">
+                        <div class="slds-media__body">
+                            <p class="slds-page-header__title slds-truncate slds-align-middle slds-text-heading--large">
+                                <strong><i class="fa fa-th" aria-hidden="true"></i>&nbsp;Opportunity Kanban</strong>
+                            </p>
+                            
+                            <p class="slds-text-body--small page-header__info">Adjusting Opportunity Stages have never become so easy!</p>
+                            <p class="slds-text-body--medium page-header__info">
+                                <apex:outputText style="color:#FFBE77;" styleClass="fa fa-exclamation-triangle" value="">
+                                    
+                                </apex:outputText>
+                                Indicates that Opportunity has no open activities!.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!--Kanban Column Headers-->
+                <div class="slds-grid">
+                    <div class="slds-tabs--path" role="application">
+                        <ul class="slds-tabs--path__nav" role="tablist">
+                            <apex:repeat value="{!OpportunityStages}" var="status">
+                                <li class="{!IF(status.value=='Closed Won','slds-tabs_path__item slds-is-complete slds-is-won', 
+                                           IF(status.value=='Closed Lost','slds-tabs_path__item slds-is-current slds-is-lost ',
+                                           'slds-tabs_path__item slds-is-complete slds-is-won slds-is-current'))}" 
+                                    role="presentation">
+                                    <a class="slds-tabs--path__link" tabindex="-1" role="tab">
+                                        <span class="slds-tabs--path__title slds-text-heading--medium"  >{!status.label}</span><br/>
+                                        
+                                    </a>
+                                </li>
+                            </apex:repeat>
+                            
+                        </ul><br/>
+                        
+                        <!-- Total Deals for every Steges -->
+                        <ul class="slds-tabs--path__nav" role="tablist">
+                            <apex:repeat value="{!OpportunityStages}" var="status">
+                                <li class="slds-tabs_path__item myClassitem" role="presentation" style="    background-color: antiquewhite !important;">
+                                    
+                                    <span class="slds-tabs--path__link slds-text-heading--medium" tabindex="-1" ><h3> Deals ({!totalDealCountMap[status.value]})</h3></span>
+                                    
+                                </li>
+                            </apex:repeat>
+                            
+                        </ul>
+                        
+                        <!-- Total Amount for every Stages -->
+                        <ul class="slds-tabs--path__nav" role="tablist">
+                            <apex:repeat value="{!OpportunityStages}" var="status">
+                                <li class="slds-tabs_path__item myClassitem fa fa-inr" role="presentation" style=" background-color: white !important; height: 50px; color:green;" >
+                                    
+                                    
+                                    <apex:outputText value="{0, number, ###,###,###,##0.00}" styleClass="slds-tabs--path__link slds-text-heading--medium fa fa-inr" style=" line-height: 2;     font-size: 20px;" >
+                                        <h1><apex:param value="{!totalAmountMap[status.value]}"  />  </h1>
+                                    </apex:outputText>
+                                </li>
+                            </apex:repeat>
+                            
+                        </ul>
+                    </div>
+                    
+                </div>
+                
+                <!--Kanban Columns-->
+                <div class="slds-grid">
+                    <apex:repeat value="{!OpportunityStages}" var="status">
+                        
+                        <div class="slds-col slds-size_4-of-12 slds-size--4-of-12 slds-has-dividers--around-space slds-scrollable--y" name="{!status.value}" style="height: 700px !important;">
+                            <apex:repeat value="{!allOpportunity[status.value]}" var="opp" >
+                                <div class="slds-item slds-m-around--small" id="{!opp.Id}" >
+                                    <div class="slds-tile slds-tile--board">
+                                        <h5 class="slds-section-title--divider slds-m-bottom--small slds-title">
+                                            <a href="/{!opp.Id}" target="_blank">
+                                                <i class="fa fa-user fa-fw" aria-hidden="true"></i>&nbsp;{!opp.Name}
+                                            </a>
+                                            <!-- Adding More Action icon -->
+                                            <div class="dropdown  slds-dropdown-trigger slds-dropdown-trigger_click slds-is-close" id="mainActionDiv">
+                                                <button class="slds-button slds-button_icon slds-button_icon-border-filled slds-button_icon-x-small fa fa-sort-desc" 
+                                                        aria-haspopup="true" title="Show More Actions" 
+                                                        id="tag<%=count++%>" value="{!opp.Id}" >
+                                                    
+                                                </button>
+                                                <div class="dropdown-content " >
+                                                    <ul class="slds-dropdown__list" role="menu">
+                                                    
+                                                        <li class="slds-dropdown__item" role="presentation" id="edit<%=count++%>" value="{!opp.Id}">
+                                                            <!-- <a href="javascript:void(0);" role="menuitem" tabindex="0">
+                                                                <span class="slds-truncate" title="Edit"  >Edit</span>
+                                                            </a> -->
+                                                            <apex:commandLink value="Edit" action="{!deleteOpportunity}"  >
+                                                                    <apex:param name="OpportunityID"
+                                                                                    value="{!opp.Id}"
+                                                                                    assignTo="{!OpportunityID}"/>
+                                                            </apex:commandLink>
+                                                                
+                                                        </li>
+                                                        <li class="slds-dropdown__item" role="presentation" id="delete<%=count++%>" value="{!opp.Id}">
+                                                            <!-- <a href="javascript:void(alert(0);" role="menuitem" tabindex="-1">
+                                                                <span class="slds-truncate" title="Delete" >Delete</span>
+                                                            </a> -->
+                                                                
+                                                                <apex:commandLink value="Delete" action="{!deleteOpportunity}"  >
+                                                                    <apex:param name="OpportunityID"
+                                                                                    value="{!opp.Id}"
+                                                                                    assignTo="{!OpportunityID}"/>
+                                                                </apex:commandLink>
+                                                          
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <!-- ICON END -->
+                                        </h5>
+                                        
+                                        <div class="slds-tile__detail slds-text-body--small">
+                                            <p class="slds-truncate">
+                                                
+                                                <apex:outputText value="{0, number, ###,###,###,##0.00}" rendered="{!opp.Amount >= 0}" styleClass="fa fa-inr" style="font-size: 20px;color: GREEN;">
+                                                    <apex:param value="{!opp.Amount }"/>  
+                                                </apex:outputText>
+                                                
+                                                <apex:outputText value="{0, number, ###,###,###,##0.00}" rendered="{!opp.Amount < 0}" styleClass="fa fa-inr" style="font-size: 20px;color: GREEN;">
+                                                    <apex:param value="{!ABS(opp.Amount )}"/>  
+                                                </apex:outputText>
+                                            </p>
+                                            <p class="slds-truncate">
+                                                <a href="/{!opp.AccountId}" target="_blank" title="{!opp.Account.Name}">
+                                                    <i class="fa fa-user fa-fw" aria-hidden="true"></i>&nbsp;{!opp.Account.Name}
+                                                </a>
+                                            </p>
+                                            <p class="slds-truncate">
+                                                <i class="fa fa-calendar fa-fw" aria-hidden="true"></i>&nbsp;
+                                                <apex:outputText value="{0,date,MM/dd/yy}"> 
+                                                    <apex:param value="{!opp.CloseDate}" /> 
+                                                </apex:outputText>
+                                                
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                
+                                                <apex:outputText rendered="{!opp.OpenActivities.size==0}" style="color:#FFBE77;"  
+                                                                 styleClass="fa fa-exclamation-triangle" title="No Open Activities">
+                                                    
+                                                </apex:outputText>
+                                                <!-- <i class="fa fa-exclamation-triangle" style="color:#FFBE77;" aria-hidden="true" id="tool<%=count++%>" rendered="{!opp.events.size==0}"></i> -->
+                                            </p>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </apex:repeat>
+                        </div>
+                    </apex:repeat>
+                </div>
+            </div>
+            
+            <script type="text/javascript">
+            $( ".slds-col" ).sortable(
+                {
+                    connectWith: ".slds-col",
+                    handle: ".slds-title",
+                    placeholder: "slds-item slds-m-around--small slds-item-placeholder",
+                    start: function( event, ui ) {
+                        $( ui.item ).addClass( "moving-card" );
+                    },
+                    stop: function( event, ui ) {
+                        $( ui.item ).removeClass( "moving-card" );
+                        
+                        var OpportunityID       = $( ui.item ).attr( "id" );
+                        var newOppStatus   = $( ui.item ).parent().attr( "name" );
+                        
+                        OpportunityKanbanController.updateOpportunityStatus(
+                            OpportunityID,
+                            newOppStatus,
+                            function( result, event ) {
+                                if( result.isSuccess ) {
+                                    toastr.info( result.message );
+                                    location.reload(true);
+                                }
+                            }
+                        );
+                    }
+                }
+            );
+            </script>
+        </body>
+        </apex:form>
+    </html>
+</apex:page>
