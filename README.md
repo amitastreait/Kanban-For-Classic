@@ -1,1 +1,2 @@
 # Kanban-For-Classic
+Kanban is a great feature provided by salesforce and available in Salesforce Lightning what if someone wants to use the same features in salesforce classic. As this is a great feature to manageging the Opportunity of different stages in lightning so I was wondering if this feature can be available in Salesforce Classic and I created this using simple apex and Controller calss.
